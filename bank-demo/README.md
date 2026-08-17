@@ -1,13 +1,6 @@
-# 3RD Core Banking - Demo (No Database)
+# 3RD Core Banking – Demo
 
-Demo giao diện hệ thống nội bộ ngân hàng. **Pure frontend**, không cần database.
-
-## Tính năng demo
-
-- Danh sách giao dịch + filter + tìm kiếm
-- Tạo giao dịch mới
-- Duyệt / Từ chối giao dịch
-- Giao diện kiểu core banking
+Demo giao diện hệ thống nội bộ ngân hàng (pure frontend, không cần database).
 
 ## Chạy local
 
@@ -18,20 +11,11 @@ npm run dev
 
 Mở http://localhost:3000
 
-## Build
+## Deploy Render
 
-```bash
-npm run build
-npm start
-```
+- Build: `npm install && npm run build`
+- Start: `npm start`
 
-## Deploy lên Render (rất đơn giản)
+## Tài liệu giao diện
 
-1. Push code lên GitHub
-2. Render → New → Web Service → chọn repo
-3. Cấu hình:
-   - **Build Command**: `npm install && npm run build`
-   - **Start Command**: `npm start`
-4. Deploy → xong
-
-Không cần thêm Environment Variable gì cả.
+Xem file **UI.md** để biết mô tả chi tiết layout, màu sắc, chức năng.
