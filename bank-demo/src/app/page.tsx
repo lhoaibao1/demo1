@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 
 type Status = "pending" | "approved" | "rejected" | "processing";
 
 interface Transaction {
-  _id: string;
+  id: string;
   code: string;
   accountNo: string;
   customerName: string;
@@ -16,6 +16,87 @@ interface Transaction {
   content?: string;
   createdAt: string;
 }
+
+const initialData: Transaction[] = [
+  {
+    id: "1",
+    code: "GD2508160001",
+    accountNo: "0123456789",
+    customerName: "CÔNG TY TNHH ABC",
+    type: "Chuyển khoản",
+    amount: 1250000000,
+    createdBy: "NV002",
+    status: "pending",
+    content: "Thanh toán hợp đồng",
+    createdAt: "2026-08-16T14:22:15",
+  },
+  {
+    id: "2",
+    code: "GD2508160002",
+    accountNo: "9876543210",
+    customerName: "NGUYỄN THỊ B",
+    type: "Rút tiền",
+    amount: 85000000,
+    createdBy: "NV005",
+    status: "approved",
+    createdAt: "2026-08-16T13:45:02",
+  },
+  {
+    id: "3",
+    code: "GD2508160003",
+    accountNo: "1122334455",
+    customerName: "TRẦN VĂN C",
+    type: "Nạp tiền",
+    amount: 320000000,
+    createdBy: "NV002",
+    status: "rejected",
+    createdAt: "2026-08-16T11:18:44",
+  },
+  {
+    id: "4",
+    code: "GD2508160004",
+    accountNo: "5566778899",
+    customerName: "CÔNG TY XYZ",
+    type: "Thanh toán L/C",
+    amount: 2100000000,
+    createdBy: "NV008",
+    status: "processing",
+    createdAt: "2026-08-16T09:50:31",
+  },
+  {
+    id: "5",
+    code: "GD2508160005",
+    accountNo: "9988776655",
+    customerName: "LÊ THỊ D",
+    type: "Chuyển khoản",
+    amount: 45500000,
+    createdBy: "NV003",
+    status: "approved",
+    createdAt: "2026-08-15T17:30:19",
+  },
+  {
+    id: "6",
+    code: "GD2508160006",
+    accountNo: "3344556677",
+    customerName: "PHẠM VĂN E",
+    type: "Chuyển khoản",
+    amount: 780000000,
+    createdBy: "NV002",
+    status: "pending",
+    createdAt: "2026-08-15T16:12:08",
+  },
+  {
+    id: "7",
+    code: "GD2508160007",
+    accountNo: "6677889900",
+    customerName: "HOÀNG VĂN F",
+    type: "Chuyển khoản",
+    amount: 156000000,
+    createdBy: "NV007",
+    status: "pending",
+    createdAt: "2026-08-15T15:05:41",
+  },
+];
 
 const statusMap: Record<Status, { label: string; className: string }> = {
   pending: { label: "Chờ duyệt", className: "bg-amber-100 text-amber-800 border-amber-300" },
@@ -39,8 +120,7 @@ function formatDate(d: string) {
 }
 
 export default function HomePage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [transactions, setTransactions] = useState<Transaction[]>(initialData);
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -52,74 +132,56 @@ export default function HomePage() {
     amount: "",
     content: "",
   });
-  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (statusFilter !== "all") params.set("status", statusFilter);
-      if (typeFilter !== "all") params.set("type", typeFilter);
-      if (search) params.set("q", search);
-      const res = await fetch(`/api/transactions?${params}`);
-      const data = await res.json();
-      setTransactions(data.transactions || []);
-    } catch {
-      setMessage("Lỗi kết nối server / database");
-    } finally {
-      setLoading(false);
+  const filtered = transactions.filter((tx) => {
+    if (statusFilter !== "all" && tx.status !== statusFilter) return false;
+    if (typeFilter !== "all" && tx.type !== typeFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return (
+        tx.code.toLowerCase().includes(q) ||
+        tx.accountNo.includes(q) ||
+        tx.customerName.toLowerCase().includes(q)
+      );
     }
-  }, [statusFilter, typeFilter, search]);
+    return true;
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const res = await fetch("/api/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          amount: Number(form.amount.replace(/\D/g, "")),
-          createdBy: "NV001",
-        }),
-      });
-      if (res.ok) {
-        setShowModal(false);
-        setForm({ accountNo: "", customerName: "", type: "Chuyển khoản", amount: "", content: "" });
-        setMessage("Tạo giao dịch thành công");
-        fetchData();
-      } else {
-        setMessage("Tạo thất bại");
-      }
-    } catch {
-      setMessage("Lỗi mạng");
-    } finally {
-      setSaving(false);
-      setTimeout(() => setMessage(""), 3000);
-    }
+  function showMsg(text: string) {
+    setMessage(text);
+    setTimeout(() => setMessage(""), 2500);
   }
 
-  async function updateStatus(id: string, status: Status) {
-    try {
-      const res = await fetch(`/api/transactions/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      if (res.ok) {
-        setMessage(status === "approved" ? "Đã duyệt" : "Đã từ chối");
-        fetchData();
-      }
-    } catch {
-      setMessage("Lỗi cập nhật");
-    }
-    setTimeout(() => setMessage(""), 2500);
+  function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    const count = transactions.length + 1;
+    const code = `GD${new Date().toISOString().slice(2, 10).replace(/-/g, "")}${String(count).padStart(4, "0")}`;
+
+    const newTx: Transaction = {
+      id: Date.now().toString(),
+      code,
+      accountNo: form.accountNo,
+      customerName: form.customerName,
+      type: form.type,
+      amount: Number(form.amount.replace(/\D/g, "")),
+      createdBy: "NV001",
+      status: "pending",
+      content: form.content,
+      createdAt: new Date().toISOString(),
+    };
+
+    setTransactions([newTx, ...transactions]);
+    setShowModal(false);
+    setForm({ accountNo: "", customerName: "", type: "Chuyển khoản", amount: "", content: "" });
+    showMsg("Tạo giao dịch thành công");
+  }
+
+  function updateStatus(id: string, status: Status) {
+    setTransactions((prev) =>
+      prev.map((tx) => (tx.id === id ? { ...tx, status } : tx))
+    );
+    showMsg(status === "approved" ? "Đã duyệt giao dịch" : "Đã từ chối giao dịch");
   }
 
   const pendingCount = transactions.filter((t) => t.status === "pending").length;
@@ -219,12 +281,6 @@ export default function HomePage() {
               />
             </div>
             <button
-              onClick={fetchData}
-              className="h-8 px-4 bg-[#0c2d48] text-white text-sm rounded hover:bg-[#145374]"
-            >
-              Tìm kiếm
-            </button>
-            <button
               onClick={() => {
                 setStatusFilter("all");
                 setTypeFilter("all");
@@ -238,7 +294,7 @@ export default function HomePage() {
 
           <div className="bg-white border border-[#c5d0dc] rounded overflow-hidden">
             <div className="px-3 py-2 border-b border-[#c5d0dc] text-sm font-medium text-slate-600">
-              {loading ? "Đang tải..." : `Có ${transactions.length} giao dịch`}
+              Có {filtered.length} giao dịch
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -256,8 +312,8 @@ export default function HomePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map((tx) => (
-                    <tr key={tx._id} className="border-t border-slate-100 hover:bg-slate-50">
+                  {filtered.map((tx) => (
+                    <tr key={tx.id} className="border-t border-slate-100 hover:bg-slate-50">
                       <td className="px-3 py-2 font-medium text-[#0c2d48]">{tx.code}</td>
                       <td className="px-3 py-2">{tx.accountNo}</td>
                       <td className="px-3 py-2 max-w-[180px] truncate">{tx.customerName}</td>
@@ -283,13 +339,13 @@ export default function HomePage() {
                         {tx.status === "pending" && (
                           <>
                             <button
-                              onClick={() => updateStatus(tx._id, "approved")}
+                              onClick={() => updateStatus(tx.id, "approved")}
                               className="text-xs px-2 py-1 bg-[#0c2d48] text-white rounded mr-1 hover:bg-[#145374]"
                             >
                               Duyệt
                             </button>
                             <button
-                              onClick={() => updateStatus(tx._id, "rejected")}
+                              onClick={() => updateStatus(tx.id, "rejected")}
                               className="text-xs px-2 py-1 border border-red-300 text-red-700 rounded hover:bg-red-50"
                             >
                               Từ chối
@@ -299,10 +355,10 @@ export default function HomePage() {
                       </td>
                     </tr>
                   ))}
-                  {!loading && transactions.length === 0 && (
+                  {filtered.length === 0 && (
                     <tr>
                       <td colSpan={9} className="px-3 py-8 text-center text-slate-400">
-                        Không có dữ liệu. Hãy chạy seed hoặc tạo giao dịch mới.
+                        Không có dữ liệu phù hợp
                       </td>
                     </tr>
                   )}
@@ -391,10 +447,9 @@ export default function HomePage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={saving}
-                  className="h-9 px-4 bg-[#0c2d48] text-white rounded text-sm hover:bg-[#145374] disabled:opacity-50"
+                  className="h-9 px-4 bg-[#0c2d48] text-white rounded text-sm hover:bg-[#145374]"
                 >
-                  {saving ? "Đang lưu..." : "Lưu & Gửi duyệt"}
+                  Lưu & Gửi duyệt
                 </button>
               </div>
             </form>
