@@ -1,93 +1,85 @@
-# 3RD Core Banking – Mô tả giao diện
+# 3RD Core Banking – Hệ thống xử lý hồ sơ thông tin
 
-## Tổng quan
-Giao diện demo hệ thống nội bộ ngân hàng (back-office), phong cách **enterprise / core banking**.
+## Mục tiêu
+Demo giao diện **hệ thống nội bộ ngân hàng** dùng để xử lý thông tin / hồ sơ (không phải chuyển tiền).
 
-Màu chủ đạo: Navy đậm (`#0b2545`) + trắng + xám nhạt.  
-Ưu tiên: rõ ràng, mật độ thông tin cao, dễ thao tác.
+Phù hợp với các nghiệp vụ:
+- Cập nhật thông tin khách hàng
+- Mở tài khoản
+- Đề nghị tín dụng
+- Khiếu nại
+- Bổ sung hồ sơ
+- Workflow Maker → Checker
 
 ---
 
-## Cấu trúc màn hình
+## Cấu trúc giao diện
 
-### 1. Top Bar (Header)
+### 1. Top Bar
 - Logo 3RD + tên hệ thống
-- Menu ngang: Giao dịch | Khách hàng | Tín dụng | Báo cáo | Quản trị
-- Thông tin chi nhánh + user đang đăng nhập (Checker)
+- Menu: Hồ sơ | Khách hàng | Tín dụng | Báo cáo | Quản trị
+- Thông tin chi nhánh + user (Checker)
 
-### 2. Sidebar trái
-- Nhóm **Giao dịch**: Cần xử lý (active), Tạo mới, Lịch sử
-- Nhóm **Khách hàng**: Tra cứu CIF, Mở tài khoản
-- Nhóm **Báo cáo**: Cuối ngày, Rủi ro
+### 2. Sidebar
+- **Hồ sơ**: Cần xử lý, Tạo hồ sơ mới, Lịch sử xử lý
+- **Khách hàng**: Tra cứu CIF, Hồ sơ khách hàng
+- **Báo cáo**: Báo cáo xử lý, Thời gian xử lý
 
-### 3. Vùng nội dung chính
+### 3. Nội dung chính
 
-#### KPI Cards (4 thẻ)
-| Thẻ | Ý nghĩa |
-|-----|---------|
-| Tổng giao dịch | Số lượng giao dịch hiện có |
-| Chờ duyệt | Số giao dịch status = pending |
-| Đã duyệt | Số giao dịch đã approve |
-| Tổng giá trị | Tổng số tiền của tất cả giao dịch |
+#### KPI
+- Tổng hồ sơ
+- Chờ xử lý
+- Đang xử lý
+- Đã duyệt
 
-#### Thanh bộ lọc
-- Lọc theo **Trạng thái**
-- Lọc theo **Loại giao dịch**
-- Ô **Tìm kiếm** (mã GD / số TK / tên KH)
-- Nút **Đặt lại**
+#### Bộ lọc
+- Trạng thái
+- Loại hồ sơ
+- Tìm kiếm (mã HS / CIF / tên KH / tiêu đề)
 
-#### Bảng danh sách giao dịch
-Cột:
-- Mã GD
-- Số tài khoản
-- Khách hàng
-- Loại
-- Số tiền (định dạng VNĐ)
-- Thời gian
-- Trạng thái (badge màu)
-- Thao tác (Chi tiết / Duyệt / Từ chối)
+#### Bảng danh sách
+| Cột | Mô tả |
+|-----|--------|
+| Mã hồ sơ | HS-YYYYMMDD-xxx |
+| Loại | Loại yêu cầu |
+| Khách hàng / CIF | Tên + mã CIF |
+| Tiêu đề | Mô tả ngắn |
+| Ưu tiên | Thường / Cao / Khẩn |
+| Thời gian | Ngày tạo |
+| Trạng thái | Badge màu |
+| Thao tác | Chi tiết / Nhận XL / Duyệt / Từ chối |
 
 ### 4. Modal
-
-**Tạo giao dịch mới**
-- Loại giao dịch
-- Số tài khoản
-- Tên khách hàng
-- Số tiền
-- Nội dung
-- Nút Hủy / Lưu & Gửi duyệt
-
-**Chi tiết giao dịch**
-- Hiển thị đầy đủ thông tin
-- Nếu đang chờ duyệt → có nút Duyệt / Từ chối
-
-### 5. Toast thông báo
-Hiện góc dưới bên phải khi:
-- Tạo thành công
-- Duyệt / Từ chối thành công
+- **Tạo hồ sơ mới**: loại, CIF, tên KH, tiêu đề, ưu tiên, ghi chú
+- **Chi tiết hồ sơ**: xem đầy đủ + thao tác duyệt / từ chối / nhận xử lý
 
 ---
 
-## Trạng thái giao dịch & màu
+## Trạng thái hồ sơ
 
 | Status | Nhãn | Màu |
 |--------|------|-----|
-| pending | Chờ duyệt | Amber / Vàng |
-| approved | Đã duyệt | Emerald / Xanh lá |
-| rejected | Từ chối | Red / Đỏ |
-| processing | Đang xử lý | Sky / Xanh dương |
+| pending | Chờ xử lý | Amber |
+| processing | Đang xử lý | Sky |
+| approved | Đã duyệt | Emerald |
+| rejected | Từ chối | Red |
+
+## Mức ưu tiên
+- Thường
+- Cao
+- Khẩn
 
 ---
 
-## Chức năng đang hoạt động (demo)
-
+## Chức năng demo đang chạy
 - ✅ Xem danh sách + KPI realtime
-- ✅ Lọc theo trạng thái / loại
+- ✅ Lọc trạng thái / loại hồ sơ
 - ✅ Tìm kiếm
-- ✅ Tạo giao dịch mới
+- ✅ Tạo hồ sơ mới
 - ✅ Xem chi tiết
-- ✅ Duyệt giao dịch
-- ✅ Từ chối giao dịch
+- ✅ Nhận xử lý
+- ✅ Duyệt / Từ chối
 - ✅ Toast thông báo
 
-> Dữ liệu lưu trên state React (frontend only), refresh trang sẽ về dữ liệu mẫu ban đầu.
+Dữ liệu lưu trên state (frontend only).
